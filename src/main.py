@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
 
-from src.api import users, posts, auth
+from src.api import auth, posts, users
 from src.core.settings import settings
 
 app = FastAPI()

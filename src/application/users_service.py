@@ -1,5 +1,5 @@
-from datetime import datetime
 import uuid
+from datetime import datetime
 
 from starlette.responses import JSONResponse
 
@@ -18,7 +18,7 @@ class UsersService:
             login=user.login,
             password=user.password,
             createdAt=datetime.now(),
-            updatedAt=datetime.now()
+            updatedAt=datetime.now(),
         )
         return await self.repository.create(user_create, id)
 

@@ -1,9 +1,8 @@
-from datetime import datetime
 import uuid
 
 from starlette.responses import JSONResponse
 
-from src.domain.models.posts import PostCreateApi, PostCreate, PostUpdate
+from src.domain.models.posts import PostCreate, PostCreateApi, PostUpdate
 from src.domain.post_repository import PostsRepository
 
 
@@ -52,5 +51,3 @@ class PostsService:
             return JSONResponse(status_code=403, content=None)
         if await self.repository.delete(post_id):
             return JSONResponse(status_code=204, content=None)
-
-

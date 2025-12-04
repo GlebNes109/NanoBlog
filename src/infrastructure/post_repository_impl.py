@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any
 
-from src.domain.models.posts import PostRead, PostCreate, PostUpdate, PostDB
+from src.domain.models.posts import PostCreate, PostDB, PostRead, PostUpdate
 from src.domain.post_repository import PostsRepository
 from src.infrastructure.simple_database import posts
 
@@ -47,5 +47,3 @@ class PostsRepositoryImpl(PostsRepository):
         for post_id, post in posts.items():
             result.append(PostRead(id=post_id, **post.model_dump()))
         return result
-
-

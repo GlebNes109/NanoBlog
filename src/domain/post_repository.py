@@ -1,6 +1,6 @@
-from typing import Protocol, Any
+from typing import Any, Protocol
 
-from src.domain.models.posts import PostRead, PostCreate, PostUpdate
+from src.domain.models.posts import PostCreate, PostRead, PostUpdate
 
 
 class PostsRepository(Protocol):

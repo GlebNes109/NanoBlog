@@ -1,5 +1,6 @@
-from typing import Protocol, Any
-from src.domain.models.users import UserRead, UserCreate, UserUpdate
+from typing import Any, Protocol
+
+from src.domain.models.users import UserCreate, UserRead, UserUpdate
 
 
 class UserRepository(Protocol):

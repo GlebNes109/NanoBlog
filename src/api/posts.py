@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Depends
 
-from src.api.dependencies import get_posts_service, get_current_user
+from src.api.dependencies import get_current_user, get_posts_service
 from src.application.posts_service import PostsService
 from src.domain.models.posts import PostCreateApi, PostUpdate
 from src.domain.models.users import UserRead
-
 
 router = APIRouter()
 
@@ -53,8 +52,7 @@ async def delete_post(
 ):
     return await service.delete_post(post_id, current_user.id)
 
+
 @router.get("", summary="Все посты")
-async def get_posts(
-    service: PostsService = Depends(get_posts_service)
-):
+async def get_posts(service: PostsService = Depends(get_posts_service)):
     return await service.get_all()

@@ -2,8 +2,8 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 
-from src.application.users_service import UsersService
 from src.application.posts_service import PostsService
+from src.application.users_service import UsersService
 from src.core.settings import settings
 from src.domain.models.users import UserRead
 from src.domain.post_repository import PostsRepository
@@ -42,8 +42,8 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserRead:
         user_id: str | None = payload.get("sub")
         if user_id is None:
             raise credentials_exception
-    except JWTError:
-        raise credentials_exception
+    except JWTError as err:
+        raise credentials_exception from err
 
     user_db = users_db.get(user_id)
     if user_db is None:
