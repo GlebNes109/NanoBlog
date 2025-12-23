@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+/* Line clamp */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.prose {
+  color: inherit;
+}
+
+.prose h1, .prose h2, .prose h3 {
+  color: inherit;
+}
+
+.prose a {
+  color: #4f46e5;
+}
+
+.dark .prose a {
+  color: #818cf8;
+}
+
+.prose code {
+  color: inherit;
+}
+
+.prose pre {
+  background-color: #f1f5f9;
+}
+
+.dark .prose pre {
+  background-color: #1e293b;
+}
+
+.markdown-content {
+  color: inherit;
+}
+
+.markdown-content p {
+  color: inherit;
+}
+
+.dark .markdown-content {
+  color: #f3f4f6;
+}
+
+.dark .markdown-content p {
+  color: #f3f4f6;
+}
+
+.markdown-content em {
+  font-style: italic;
+  color: inherit;
+}
+
+/* Animations */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}

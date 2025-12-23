@@ -1,0 +1,52 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: microblog_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-microblog}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-microblog}
+      POSTGRES_DB: ${POSTGRES_DB:-microblog}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-microblog}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: microblog_backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-microblog}:${POSTGRES_PASSWORD:-microblog}@postgres:5432/${POSTGRES_DB:-microblog}
+      SERVER_ADDRESS: ${SERVER_ADDRESS:-0.0.0.0:8000}
+      SECRET_KEY: ${SECRET_KEY:-your-secret-key-change-in-production}
+      ALGORITHM: ${ALGORITHM:-HS256}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      PYTHONPATH: /app
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - ./backend:/app
+      - uploads_data:/app/static/uploads
+
+  frontend:
+    build:
+      context: ./frontend/micro-blog
+      args:
+        - VITE_API_URL=http://localhost:8000
+    container_name: microblog_frontend
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+
+volumes:
+  postgres_data:
+  uploads_data:
+
