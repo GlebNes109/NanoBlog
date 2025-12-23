@@ -26,5 +26,3 @@ class BaseRepository(ABC, Generic[T, CreateT, UpdateT]):
     @abstractmethod
     async def delete(self, id: Any) -> bool:
         pass
-
-

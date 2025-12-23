@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 
-from src.api.dependencies import get_current_user, get_comments_service
+from src.api.dependencies import get_comments_service, get_current_user
 from src.application.comments_service import CommentsService
-from src.domain.models.posts import CommentRead, CommentCreate
+from src.domain.models.posts import CommentCreate, CommentRead
 from src.domain.models.users import UserRead
 
 router = APIRouter()

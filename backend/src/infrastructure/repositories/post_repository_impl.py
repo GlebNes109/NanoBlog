@@ -18,18 +18,18 @@ class PostRepositoryImpl(PostRepository):
             post_uuid = UUID(post_id)
         except ValueError:
             return None
-        
+
         post = await self.session.get(PostORM, post_uuid)
         if not post:
             return None
-        
+
         user = await self.session.get(User, post.author_id)
         rating = await self._get_rating(post_uuid)
         comments_count = await self._get_comments_count(post_uuid)
-        
+
         is_favorited = False
         user_rating = None
-        
+
         if current_user_id:
             try:
                 user_uuid = UUID(current_user_id)
@@ -37,28 +37,32 @@ class PostRepositoryImpl(PostRepository):
                 user_rating = await self._get_user_rating(user_uuid, post_uuid)
             except ValueError:
                 pass
-        
+
         return self._to_read(post, user, rating, user_rating, comments_count, is_favorited)
 
     async def get_all(self, current_user_id: str | None = None) -> list[PostRead]:
         statement = (
-            select(PostORM, User, func.coalesce(func.sum(PostRating.value), 0).label("rating"),
-                   func.count(Comment.id.distinct()).label("comments_count"))
+            select(
+                PostORM,
+                User,
+                func.coalesce(func.sum(PostRating.value), 0).label("rating"),
+                func.count(Comment.id.distinct()).label("comments_count"),
+            )
             .join(User, PostORM.author_id == User.id)
             .outerjoin(PostRating, PostRating.post_id == PostORM.id)
             .outerjoin(Comment, Comment.post_id == PostORM.id)
             .group_by(PostORM.id, User.id)
             .order_by(PostORM.created_at.desc())
         )
-        
+
         result = await self.session.execute(statement)
         rows = result.all()
-        
+
         posts = []
         for post, user, rating, comments_count in rows:
             is_favorited = False
             user_rating = None
-            
+
             if current_user_id:
                 try:
                     user_uuid = UUID(current_user_id)
@@ -66,20 +70,30 @@ class PostRepositoryImpl(PostRepository):
                     user_rating = await self._get_user_rating(user_uuid, post.id)
                 except ValueError:
                     pass
-            
-            posts.append(self._to_read(post, user, rating or 0, user_rating, comments_count or 0, is_favorited))
-        
+
+            posts.append(
+                self._to_read(
+                    post, user, rating or 0, user_rating, comments_count or 0, is_favorited
+                )
+            )
+
         return posts
 
-    async def get_by_author(self, author_id: str, current_user_id: str | None = None) -> list[PostRead]:
+    async def get_by_author(
+        self, author_id: str, current_user_id: str | None = None
+    ) -> list[PostRead]:
         try:
             author_uuid = UUID(author_id)
         except ValueError:
             return []
-        
+
         statement = (
-            select(PostORM, User, func.coalesce(func.sum(PostRating.value), 0).label("rating"),
-                   func.count(Comment.id.distinct()).label("comments_count"))
+            select(
+                PostORM,
+                User,
+                func.coalesce(func.sum(PostRating.value), 0).label("rating"),
+                func.count(Comment.id.distinct()).label("comments_count"),
+            )
             .join(User, PostORM.author_id == User.id)
             .outerjoin(PostRating, PostRating.post_id == PostORM.id)
             .outerjoin(Comment, Comment.post_id == PostORM.id)
@@ -87,15 +101,15 @@ class PostRepositoryImpl(PostRepository):
             .group_by(PostORM.id, User.id)
             .order_by(PostORM.created_at.desc())
         )
-        
+
         result = await self.session.execute(statement)
         rows = result.all()
-        
+
         posts = []
         for post, user, rating, comments_count in rows:
             is_favorited = False
             user_rating = None
-            
+
             if current_user_id:
                 try:
                     user_uuid = UUID(current_user_id)
@@ -103,14 +117,18 @@ class PostRepositoryImpl(PostRepository):
                     user_rating = await self._get_user_rating(user_uuid, post.id)
                 except ValueError:
                     pass
-            
-            posts.append(self._to_read(post, user, rating or 0, user_rating, comments_count or 0, is_favorited))
-        
+
+            posts.append(
+                self._to_read(
+                    post, user, rating or 0, user_rating, comments_count or 0, is_favorited
+                )
+            )
+
         return posts
 
     async def create(self, post: PostCreate, author_id: str) -> PostRead:
         author_uuid = UUID(author_id)
-        
+
         post_orm = PostORM(
             id=uuid4(),
             author_id=author_uuid,
@@ -123,7 +141,7 @@ class PostRepositoryImpl(PostRepository):
         self.session.add(post_orm)
         await self.session.commit()
         await self.session.refresh(post_orm)
-        
+
         user = await self.session.get(User, author_uuid)
         return self._to_read(post_orm, user, 0, None, 0, False)
 
@@ -132,23 +150,23 @@ class PostRepositoryImpl(PostRepository):
             post_uuid = UUID(post_id)
         except ValueError:
             return None
-        
+
         post_orm = await self.session.get(PostORM, post_uuid)
         if not post_orm:
             return None
-        
+
         post_orm.title = post.title
         post_orm.content = post.content
         post_orm.updated_at = datetime.utcnow()
-        
+
         self.session.add(post_orm)
         await self.session.commit()
         await self.session.refresh(post_orm)
-        
+
         user = await self.session.get(User, post_orm.author_id)
         rating = await self._get_rating(post_uuid)
         comments_count = await self._get_comments_count(post_uuid)
-        
+
         return self._to_read(post_orm, user, rating, None, comments_count, False)
 
     async def delete(self, post_id: str) -> bool:
@@ -156,21 +174,25 @@ class PostRepositoryImpl(PostRepository):
             post_uuid = UUID(post_id)
         except ValueError:
             return False
-        
+
         post = await self.session.get(PostORM, post_uuid)
         if not post:
             return False
-        
+
         await self.session.delete(post)
         await self.session.commit()
         return True
 
     async def search(self, query: str, current_user_id: str | None = None) -> list[PostRead]:
         search_term = f"%{query}%"
-        
+
         statement = (
-            select(PostORM, User, func.coalesce(func.sum(PostRating.value), 0).label("rating"),
-                   func.count(Comment.id.distinct()).label("comments_count"))
+            select(
+                PostORM,
+                User,
+                func.coalesce(func.sum(PostRating.value), 0).label("rating"),
+                func.count(Comment.id.distinct()).label("comments_count"),
+            )
             .join(User, PostORM.author_id == User.id)
             .outerjoin(PostRating, PostRating.post_id == PostORM.id)
             .outerjoin(Comment, Comment.post_id == PostORM.id)
@@ -178,15 +200,15 @@ class PostRepositoryImpl(PostRepository):
             .group_by(PostORM.id, User.id)
             .order_by(PostORM.created_at.desc())
         )
-        
+
         result = await self.session.execute(statement)
         rows = result.all()
-        
+
         posts = []
         for post, user, rating, comments_count in rows:
             is_favorited = False
             user_rating = None
-            
+
             if current_user_id:
                 try:
                     user_uuid = UUID(current_user_id)
@@ -194,14 +216,20 @@ class PostRepositoryImpl(PostRepository):
                     user_rating = await self._get_user_rating(user_uuid, post.id)
                 except ValueError:
                     pass
-            
-            posts.append(self._to_read(post, user, rating or 0, user_rating, comments_count or 0, is_favorited))
-        
+
+            posts.append(
+                self._to_read(
+                    post, user, rating or 0, user_rating, comments_count or 0, is_favorited
+                )
+            )
+
         return posts
 
     async def _get_rating(self, post_id: UUID) -> int:
         result = await self.session.execute(
-            select(func.coalesce(func.sum(PostRating.value), 0)).where(PostRating.post_id == post_id)
+            select(func.coalesce(func.sum(PostRating.value), 0)).where(
+                PostRating.post_id == post_id
+            )
         )
         return result.scalar() or 0
 
@@ -225,8 +253,14 @@ class PostRepositoryImpl(PostRepository):
         return rating.value if rating else None
 
     @staticmethod
-    def _to_read(post: PostORM, user: User | None, rating: int, user_rating: int | None, 
-                 comments_count: int, is_favorited: bool) -> PostRead:
+    def _to_read(
+        post: PostORM,
+        user: User | None,
+        rating: int,
+        user_rating: int | None,
+        comments_count: int,
+        is_favorited: bool,
+    ) -> PostRead:
         return PostRead(
             id=str(post.id),
             authorId=str(post.author_id),
@@ -245,5 +279,3 @@ class PostRepositoryImpl(PostRepository):
 
 
 Post = PostORM
-
-

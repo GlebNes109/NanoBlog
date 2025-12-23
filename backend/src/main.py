@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from src.api import posts, users, auth, comments, favorites, ratings, search, uploads
+from src.api import auth, comments, favorites, posts, ratings, search, uploads, users
 from src.core.settings import settings
 from src.infrastructure.database.database import init_db
 

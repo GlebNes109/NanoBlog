@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+
 from src.domain.models.posts import PostCreate, PostRead, PostUpdate
 
 
@@ -12,7 +13,9 @@ class PostRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_by_author(self, author_id: str, current_user_id: str | None = None) -> list[PostRead]:
+    async def get_by_author(
+        self, author_id: str, current_user_id: str | None = None
+    ) -> list[PostRead]:
         pass
 
     @abstractmethod
@@ -30,5 +33,3 @@ class PostRepository(ABC):
     @abstractmethod
     async def search(self, query: str, current_user_id: str | None = None) -> list[PostRead]:
         pass
-
-

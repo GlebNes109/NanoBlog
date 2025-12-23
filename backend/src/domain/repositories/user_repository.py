@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from src.domain.models.users import UserCreate, UserRead, UserPublic, UserProfileUpdate
+
+from src.domain.models.users import UserCreate, UserProfileUpdate, UserPublic, UserRead
 
 
 class UserRepository(ABC):
@@ -38,5 +39,3 @@ class UserRepository(ABC):
     @abstractmethod
     async def get_public_profile(self, user_id: str) -> UserPublic | None:
         pass
-
-

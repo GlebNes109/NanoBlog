@@ -15,25 +15,21 @@ class AuthService:
 
     async def login(self, username: str, password: str) -> dict:
         user = await self.repository.get_by_login(username)
-        
+
         if not user:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Incorrect username or password"
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect username or password"
             )
-        
+
         if not await self.password_hasher.verify(password, user.password):
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Incorrect username or password"
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect username or password"
             )
-        
+
         access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
         access_token = create_access_token(
             data={"sub": user.id},
             expires_delta=access_token_expires,
         )
-        
+
         return {"access_token": access_token, "token_type": "bearer"}
-
-

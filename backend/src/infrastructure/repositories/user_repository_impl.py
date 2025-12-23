@@ -2,9 +2,9 @@ from datetime import datetime
 from uuid import UUID, uuid4
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import select, or_
+from sqlmodel import or_, select
 
-from src.domain.models.users import UserCreate, UserRead, UserPublic, UserProfileUpdate
+from src.domain.models.users import UserCreate, UserProfileUpdate, UserPublic, UserRead
 from src.domain.repositories.user_repository import UserRepository
 from src.infrastructure.database.models import User as UserORM
 
@@ -52,11 +52,11 @@ class UserRepositoryImpl(UserRepository):
             user_uuid = UUID(user_id)
         except ValueError:
             return None
-        
+
         user = await self.session.get(UserORM, user_uuid)
         if not user:
             return None
-        
+
         if profile.email is not None:
             user.email = profile.email
         if profile.login is not None:
@@ -64,7 +64,7 @@ class UserRepositoryImpl(UserRepository):
         if profile.bio is not None:
             user.bio = profile.bio
         user.updated_at = datetime.utcnow()
-        
+
         self.session.add(user)
         await self.session.commit()
         await self.session.refresh(user)
@@ -75,11 +75,11 @@ class UserRepositoryImpl(UserRepository):
             user_uuid = UUID(user_id)
         except ValueError:
             return False
-        
+
         user = await self.session.get(UserORM, user_uuid)
         if not user:
             return False
-        
+
         user.avatar_url = avatar_url
         user.updated_at = datetime.utcnow()
         self.session.add(user)
@@ -91,21 +91,23 @@ class UserRepositoryImpl(UserRepository):
             user_uuid = UUID(user_id)
         except ValueError:
             return False
-        
+
         user = await self.session.get(UserORM, user_uuid)
         if not user:
             return False
-        
+
         await self.session.delete(user)
         await self.session.commit()
         return True
 
     async def search(self, query: str) -> list[UserPublic]:
         search_term = f"%{query}%"
-        statement = select(UserORM).where(
-            or_(UserORM.login.ilike(search_term), UserORM.email.ilike(search_term))
-        ).order_by(UserORM.login)
-        
+        statement = (
+            select(UserORM)
+            .where(or_(UserORM.login.ilike(search_term), UserORM.email.ilike(search_term)))
+            .order_by(UserORM.login)
+        )
+
         result = await self.session.execute(statement)
         users = result.scalars().all()
         return [self._to_public(user) for user in users]
@@ -115,7 +117,7 @@ class UserRepositoryImpl(UserRepository):
             user_uuid = UUID(user_id)
         except ValueError:
             return None
-        
+
         user = await self.session.get(UserORM, user_uuid)
         return self._to_public(user) if user else None
 
@@ -141,5 +143,3 @@ class UserRepositoryImpl(UserRepository):
             createdAt=user.created_at,
             updatedAt=user.updated_at,
         )
-
-

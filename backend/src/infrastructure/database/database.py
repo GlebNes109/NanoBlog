@@ -25,7 +25,7 @@ async def init_db() -> None:
         await conn.run_sync(SQLModel.metadata.create_all)
 
 
-async def get_session() -> AsyncGenerator[AsyncSession, None]:
+async def get_session() -> AsyncGenerator[AsyncSession]:
     async with AsyncSessionLocal() as session:
         yield session
 
@@ -43,9 +43,9 @@ async def get_user_by_login(session: AsyncSession, login: str) -> UserORM | None
     result = await session.execute(statement)
     return result.scalar_one_or_none()
 
+
 async_session_maker = async_sessionmaker(
     engine,
     expire_on_commit=False,
     class_=AsyncSession,
 )
-

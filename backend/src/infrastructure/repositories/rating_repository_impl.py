@@ -16,9 +16,11 @@ class RatingRepositoryImpl(RatingRepository):
             post_uuid = UUID(post_id)
         except ValueError:
             return 0
-        
+
         result = await self.session.execute(
-            select(func.coalesce(func.sum(PostRating.value), 0)).where(PostRating.post_id == post_uuid)
+            select(func.coalesce(func.sum(PostRating.value), 0)).where(
+                PostRating.post_id == post_uuid
+            )
         )
         return result.scalar() or 0
 
@@ -28,9 +30,11 @@ class RatingRepositoryImpl(RatingRepository):
             post_uuid = UUID(post_id)
         except ValueError:
             return None
-        
+
         result = await self.session.execute(
-            select(PostRating).where(PostRating.user_id == user_uuid, PostRating.post_id == post_uuid)
+            select(PostRating).where(
+                PostRating.user_id == user_uuid, PostRating.post_id == post_uuid
+            )
         )
         rating = result.scalar_one_or_none()
         return rating.value if rating else None
@@ -41,19 +45,21 @@ class RatingRepositoryImpl(RatingRepository):
             post_uuid = UUID(post_id)
         except ValueError:
             return False
-        
+
         result = await self.session.execute(
-            select(PostRating).where(PostRating.user_id == user_uuid, PostRating.post_id == post_uuid)
+            select(PostRating).where(
+                PostRating.user_id == user_uuid, PostRating.post_id == post_uuid
+            )
         )
         existing = result.scalar_one_or_none()
-        
+
         if existing:
             existing.value = value
             self.session.add(existing)
         else:
             rating = PostRating(user_id=user_uuid, post_id=post_uuid, value=value)
             self.session.add(rating)
-        
+
         await self.session.commit()
         return True
 
@@ -63,16 +69,16 @@ class RatingRepositoryImpl(RatingRepository):
             post_uuid = UUID(post_id)
         except ValueError:
             return False
-        
+
         result = await self.session.execute(
-            select(PostRating).where(PostRating.user_id == user_uuid, PostRating.post_id == post_uuid)
+            select(PostRating).where(
+                PostRating.user_id == user_uuid, PostRating.post_id == post_uuid
+            )
         )
         rating = result.scalar_one_or_none()
-        
+
         if rating:
             await self.session.delete(rating)
             await self.session.commit()
-        
+
         return True
-
-

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from src.domain.models.posts import CommentRead, CommentCreate
+
+from src.domain.models.posts import CommentCreate, CommentRead
 
 
 class CommentRepository(ABC):
@@ -18,5 +19,3 @@ class CommentRepository(ABC):
     @abstractmethod
     async def get_by_id(self, comment_id: str) -> CommentRead | None:
         pass
-
-

@@ -3,9 +3,6 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
-from typing import Optional
-
-
 class PostRead(BaseModel):
     id: str
     authorId: str

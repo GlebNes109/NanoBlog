@@ -17,10 +17,14 @@ class FavoriteRepositoryImpl(FavoriteRepository):
             user_uuid = UUID(user_id)
         except ValueError:
             return []
-        
+
         statement = (
-            select(Post, User, func.coalesce(func.sum(PostRating.value), 0).label("rating"),
-                   func.count(Comment.id.distinct()).label("comments_count"))
+            select(
+                Post,
+                User,
+                func.coalesce(func.sum(PostRating.value), 0).label("rating"),
+                func.count(Comment.id.distinct()).label("comments_count"),
+            )
             .join(Favorite, Favorite.post_id == Post.id)
             .join(User, Post.author_id == User.id)
             .outerjoin(PostRating, PostRating.post_id == Post.id)
@@ -29,10 +33,10 @@ class FavoriteRepositoryImpl(FavoriteRepository):
             .group_by(Post.id, User.id)
             .order_by(Post.created_at.desc())
         )
-        
+
         result = await self.session.execute(statement)
         rows = result.all()
-        
+
         return [
             PostRead(
                 id=str(post.id),
@@ -58,13 +62,13 @@ class FavoriteRepositoryImpl(FavoriteRepository):
             post_uuid = UUID(post_id)
         except ValueError:
             return False
-        
+
         existing = await self.session.execute(
             select(Favorite).where(Favorite.user_id == user_uuid, Favorite.post_id == post_uuid)
         )
         if existing.scalar_one_or_none():
             return False
-        
+
         favorite = Favorite(user_id=user_uuid, post_id=post_uuid)
         self.session.add(favorite)
         await self.session.commit()
@@ -76,15 +80,15 @@ class FavoriteRepositoryImpl(FavoriteRepository):
             post_uuid = UUID(post_id)
         except ValueError:
             return False
-        
+
         result = await self.session.execute(
             select(Favorite).where(Favorite.user_id == user_uuid, Favorite.post_id == post_uuid)
         )
         favorite = result.scalar_one_or_none()
-        
+
         if not favorite:
             return False
-        
+
         await self.session.delete(favorite)
         await self.session.commit()
         return True
@@ -95,10 +99,8 @@ class FavoriteRepositoryImpl(FavoriteRepository):
             post_uuid = UUID(post_id)
         except ValueError:
             return False
-        
+
         result = await self.session.execute(
             select(Favorite).where(Favorite.user_id == user_uuid, Favorite.post_id == post_uuid)
         )
         return result.scalar_one_or_none() is not None
-
-

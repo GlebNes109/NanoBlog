@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends
 
-from src.api.dependencies import get_current_user, get_user_service, get_posts_service
+from src.api.dependencies import get_current_user, get_posts_service, get_user_service
 from src.application.posts_service import PostsService
 from src.application.users_service import UsersService
-from src.domain.models.users import UserCreateApi, UserRead, UserPublic, UserProfileUpdate
+from src.domain.models.users import UserCreateApi, UserProfileUpdate, UserPublic, UserRead
 
 router = APIRouter()
 

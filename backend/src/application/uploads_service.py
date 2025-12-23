@@ -24,21 +24,19 @@ class UploadsService:
 
     async def _upload_file(self, file: UploadFile, prefix: str) -> str:
         UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-        
+
         ext = Path(file.filename).suffix.lower() if file.filename else ""
         if ext not in ALLOWED_EXTENSIONS:
             raise HTTPException(status_code=400, detail="Invalid file type")
-        
+
         content = await file.read()
         if len(content) > MAX_FILE_SIZE:
             raise HTTPException(status_code=400, detail="File too large (max 5MB)")
-        
+
         filename = f"{prefix}_{uuid.uuid4().hex[:8]}{ext}"
         filepath = UPLOAD_DIR / filename
-        
+
         with open(filepath, "wb") as f:
             f.write(content)
-        
+
         return f"/static/uploads/{filename}"
-
-

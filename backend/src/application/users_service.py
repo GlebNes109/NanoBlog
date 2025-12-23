@@ -2,7 +2,7 @@ from datetime import datetime
 
 from fastapi import HTTPException, status
 
-from src.domain.models.users import UserCreate, UserPublic, UserProfileUpdate, UserCreateApi
+from src.domain.models.users import UserCreate, UserCreateApi, UserProfileUpdate, UserPublic
 from src.domain.password_hasher import PasswordHasher
 from src.domain.repositories.user_repository import UserRepository
 
@@ -16,17 +16,13 @@ class UsersService:
         existing_email = await self.repository.get_by_email(user.email)
         if existing_email:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email уже зарегистрирован"
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Email уже зарегистрирован"
             )
-        
+
         existing_login = await self.repository.get_by_login(user.login)
         if existing_login:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Логин уже занят"
-            )
-        
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Логин уже занят")
+
         hashed_password = await self.password_hasher.hash(user.password)
         user_create = UserCreate(
             email=user.email,
@@ -55,18 +51,16 @@ class UsersService:
             existing = await self.repository.get_by_email(profile.email)
             if existing and existing.id != user_id:
                 raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Email уже используется"
+                    status_code=status.HTTP_400_BAD_REQUEST, detail="Email уже используется"
                 )
-        
+
         if profile.login:
             existing = await self.repository.get_by_login(profile.login)
             if existing and existing.id != user_id:
                 raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Логин уже занят"
+                    status_code=status.HTTP_400_BAD_REQUEST, detail="Логин уже занят"
                 )
-        
+
         user = await self.repository.update_profile(user_id, profile)
         if not user:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
@@ -75,10 +69,9 @@ class UsersService:
     async def delete_user(self, user_id: str, current_user_id: str) -> None:
         if user_id != current_user_id:
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN, 
-                detail="Not enough permissions"
+                status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions"
             )
-        
+
         deleted = await self.repository.delete(user_id)
         if not deleted:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")

@@ -20,7 +20,6 @@ from src.infrastructure.repositories.favorite_repository_impl import FavoriteRep
 from src.infrastructure.repositories.post_repository_impl import PostRepositoryImpl
 from src.infrastructure.repositories.rating_repository_impl import RatingRepositoryImpl
 from src.infrastructure.repositories.user_repository_impl import UserRepositoryImpl
-from src.core.logs import logger
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="/auth/token", auto_error=False)
@@ -38,15 +37,21 @@ async def get_post_repository(session: AsyncSession = Depends(get_session)) -> P
     return PostRepositoryImpl(session)
 
 
-async def get_comment_repository(session: AsyncSession = Depends(get_session)) -> CommentRepositoryImpl:
+async def get_comment_repository(
+    session: AsyncSession = Depends(get_session),
+) -> CommentRepositoryImpl:
     return CommentRepositoryImpl(session)
 
 
-async def get_favorite_repository(session: AsyncSession = Depends(get_session)) -> FavoriteRepositoryImpl:
+async def get_favorite_repository(
+    session: AsyncSession = Depends(get_session),
+) -> FavoriteRepositoryImpl:
     return FavoriteRepositoryImpl(session)
 
 
-async def get_rating_repository(session: AsyncSession = Depends(get_session)) -> RatingRepositoryImpl:
+async def get_rating_repository(
+    session: AsyncSession = Depends(get_session),
+) -> RatingRepositoryImpl:
     return RatingRepositoryImpl(session)
 
 

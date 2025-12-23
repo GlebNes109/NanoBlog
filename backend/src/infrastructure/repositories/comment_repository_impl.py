@@ -17,23 +17,23 @@ class CommentRepositoryImpl(CommentRepository):
             post_uuid = UUID(post_id)
         except ValueError:
             return []
-        
+
         statement = (
             select(CommentORM, User)
             .join(User, CommentORM.author_id == User.id)
             .where(CommentORM.post_id == post_uuid)
             .order_by(CommentORM.created_at.desc())
         )
-        
+
         result = await self.session.execute(statement)
         rows = result.all()
-        
+
         return [self._to_read(comment, user) for comment, user in rows]
 
     async def create(self, post_id: str, author_id: str, comment: CommentCreate) -> CommentRead:
         post_uuid = UUID(post_id)
         author_uuid = UUID(author_id)
-        
+
         comment_orm = CommentORM(
             id=uuid4(),
             post_id=post_uuid,
@@ -43,7 +43,7 @@ class CommentRepositoryImpl(CommentRepository):
         self.session.add(comment_orm)
         await self.session.commit()
         await self.session.refresh(comment_orm)
-        
+
         user = await self.session.get(User, author_uuid)
         return self._to_read(comment_orm, user)
 
@@ -52,11 +52,11 @@ class CommentRepositoryImpl(CommentRepository):
             comment_uuid = UUID(comment_id)
         except ValueError:
             return False
-        
+
         comment = await self.session.get(CommentORM, comment_uuid)
         if not comment:
             return False
-        
+
         await self.session.delete(comment)
         await self.session.commit()
         return True
@@ -66,11 +66,11 @@ class CommentRepositoryImpl(CommentRepository):
             comment_uuid = UUID(comment_id)
         except ValueError:
             return None
-        
+
         comment = await self.session.get(CommentORM, comment_uuid)
         if not comment:
             return None
-        
+
         user = await self.session.get(User, comment.author_id)
         return self._to_read(comment, user)
 
@@ -85,5 +85,3 @@ class CommentRepositoryImpl(CommentRepository):
             content=comment.content,
             createdAt=comment.created_at,
         )
-
-

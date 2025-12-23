@@ -17,5 +17,3 @@ class RatingRepository(ABC):
     @abstractmethod
     async def remove_rating(self, user_id: str, post_id: str) -> bool:
         pass
-
-

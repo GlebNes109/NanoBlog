@@ -16,15 +16,10 @@ class FavoritesService:
         if not added:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Already in favorites or invalid post"
+                detail="Already in favorites or invalid post",
             )
 
     async def remove_from_favorites(self, user_id: str, post_id: str) -> None:
         removed = await self.repository.remove(user_id, post_id)
         if not removed:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Not in favorites"
-            )
-
-
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not in favorites")

@@ -1,6 +1,6 @@
 from fastapi import HTTPException, status
 
-from src.domain.models.posts import PostCreate, PostRead, PostUpdate, PostCreateApi
+from src.domain.models.posts import PostCreate, PostCreateApi, PostRead, PostUpdate
 from src.domain.repositories.post_repository import PostRepository
 
 
@@ -24,17 +24,23 @@ class PostsService:
     async def get_my_posts(self, author_id: str) -> list[PostRead]:
         return await self.repository.get_by_author(author_id, author_id)
 
-    async def get_user_posts(self, author_id: str, current_user_id: str | None = None) -> list[PostRead]:
+    async def get_user_posts(
+        self, author_id: str, current_user_id: str | None = None
+    ) -> list[PostRead]:
         return await self.repository.get_by_author(author_id, current_user_id)
 
-    async def update_post(self, post_id: str, post_data: PostUpdate, current_user_id: str) -> PostRead:
+    async def update_post(
+        self, post_id: str, post_data: PostUpdate, current_user_id: str
+    ) -> PostRead:
         existing = await self.repository.get_by_id(post_id)
         if not existing:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
-        
+
         if existing.authorId != current_user_id:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
-        
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions"
+            )
+
         updated = await self.repository.update(post_id, post_data)
         if not updated:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
@@ -44,10 +50,12 @@ class PostsService:
         existing = await self.repository.get_by_id(post_id)
         if not existing:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
-        
+
         if existing.authorId != current_user_id:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
-        
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions"
+            )
+
         deleted = await self.repository.delete(post_id)
         if not deleted:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")

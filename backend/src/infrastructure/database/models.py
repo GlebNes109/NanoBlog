@@ -5,10 +5,10 @@ from uuid import UUID, uuid4
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    pass
 
 
-class User(SQLModel, table=True):
+class User(SQLModel, table=True):  # type: ignore[call-arg]
     __tablename__ = "users"
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
@@ -33,7 +33,7 @@ class User(SQLModel, table=True):
     )
 
 
-class Post(SQLModel, table=True):
+class Post(SQLModel, table=True):  # type: ignore[call-arg]
     __tablename__ = "posts"
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
@@ -51,7 +51,7 @@ class Post(SQLModel, table=True):
     ratings: list["PostRating"] = Relationship(back_populates="post")
 
 
-class PostRating(SQLModel, table=True):
+class PostRating(SQLModel, table=True):  # type: ignore[call-arg]
     __tablename__ = "post_ratings"
 
     user_id: UUID = Field(foreign_key="users.id", primary_key=True)
@@ -63,7 +63,7 @@ class PostRating(SQLModel, table=True):
     post: Post = Relationship(back_populates="ratings")
 
 
-class Tag(SQLModel, table=True):
+class Tag(SQLModel, table=True):  # type: ignore[call-arg]
     __tablename__ = "tags"
 
     id: int = Field(primary_key=True)
@@ -72,7 +72,7 @@ class Tag(SQLModel, table=True):
     posts: list["PostTag"] = Relationship(back_populates="tag")
 
 
-class PostTag(SQLModel, table=True):
+class PostTag(SQLModel, table=True):  # type: ignore[call-arg]
     __tablename__ = "post_tags"
 
     post_id: UUID = Field(foreign_key="posts.id", primary_key=True)
@@ -82,7 +82,7 @@ class PostTag(SQLModel, table=True):
     tag: Tag = Relationship(back_populates="posts")
 
 
-class Favorite(SQLModel, table=True):
+class Favorite(SQLModel, table=True):  # type: ignore[call-arg]
     __tablename__ = "favorites"
 
     user_id: UUID = Field(foreign_key="users.id", primary_key=True)
@@ -93,7 +93,7 @@ class Favorite(SQLModel, table=True):
     post: Post = Relationship(back_populates="favorites")
 
 
-class Comment(SQLModel, table=True):
+class Comment(SQLModel, table=True):  # type: ignore[call-arg]
     __tablename__ = "comments"
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
@@ -106,7 +106,7 @@ class Comment(SQLModel, table=True):
     author: User = Relationship(back_populates="comments")
 
 
-class Subscription(SQLModel, table=True):
+class Subscription(SQLModel, table=True):  # type: ignore[call-arg]
     __tablename__ = "subscriptions"
 
     follower_id: UUID = Field(foreign_key="users.id", primary_key=True)
@@ -121,4 +121,3 @@ class Subscription(SQLModel, table=True):
         back_populates="subscriptions_followers",
         sa_relationship_kwargs={"foreign_keys": "Subscription.following_id"},
     )
-

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+
 from src.domain.models.posts import PostRead
 
 
@@ -18,5 +19,3 @@ class FavoriteRepository(ABC):
     @abstractmethod
     async def is_favorited(self, user_id: str, post_id: str) -> bool:
         pass
-
-

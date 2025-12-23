@@ -1,24 +1,17 @@
-"""Integration tests for posts API."""
 import pytest
-
 from httpx import AsyncClient
 
 pytestmark = pytest.mark.integration
 
 
-
 @pytest.mark.asyncio
 async def test_create_post(client: AsyncClient, test_user, auth_headers):
-    """Test creating a post."""
     response = await client.post(
         "/posts",
         headers=auth_headers,
-        json={
-            "title": "Test Post",
-            "content": "This is a test post content"
-        }
+        json={"title": "Test Post", "content": "This is a test post content"},
     )
-    
+
     assert response.status_code == 200
     data = response.json()
     assert data["title"] == "Test Post"
@@ -29,33 +22,20 @@ async def test_create_post(client: AsyncClient, test_user, auth_headers):
 
 @pytest.mark.asyncio
 async def test_create_post_unauthorized(client: AsyncClient):
-    """Test creating post without authentication."""
-    response = await client.post(
-        "/posts",
-        json={
-            "title": "Test Post",
-            "content": "Content"
-        }
-    )
-    
+    response = await client.post("/posts", json={"title": "Test Post", "content": "Content"})
+
     assert response.status_code == 401
 
 
 @pytest.mark.asyncio
 async def test_get_all_posts(client: AsyncClient, test_user, auth_headers):
-    """Test getting all posts."""
     # Create a post first
     await client.post(
-        "/posts",
-        headers=auth_headers,
-        json={
-            "title": "Test Post",
-            "content": "Content"
-        }
+        "/posts", headers=auth_headers, json={"title": "Test Post", "content": "Content"}
     )
-    
+
     response = await client.get("/posts")
-    
+
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
@@ -64,21 +44,15 @@ async def test_get_all_posts(client: AsyncClient, test_user, auth_headers):
 
 @pytest.mark.asyncio
 async def test_get_post_by_id(client: AsyncClient, test_user, auth_headers):
-    """Test getting post by ID."""
     # Create a post first
     create_response = await client.post(
-        "/posts",
-        headers=auth_headers,
-        json={
-            "title": "Test Post",
-            "content": "Content"
-        }
+        "/posts", headers=auth_headers, json={"title": "Test Post", "content": "Content"}
     )
     post_id = create_response.json()["id"]
-    
+
     # Get the post
     response = await client.get(f"/posts/{post_id}")
-    
+
     assert response.status_code == 200
     data = response.json()
     assert data["id"] == post_id
@@ -87,28 +61,21 @@ async def test_get_post_by_id(client: AsyncClient, test_user, auth_headers):
 
 @pytest.mark.asyncio
 async def test_update_post(client: AsyncClient, test_user, auth_headers):
-    """Test updating a post."""
     # Create a post first
     create_response = await client.post(
         "/posts",
         headers=auth_headers,
-        json={
-            "title": "Original Title",
-            "content": "Original content"
-        }
+        json={"title": "Original Title", "content": "Original content"},
     )
     post_id = create_response.json()["id"]
-    
+
     # Update the post
     response = await client.put(
         f"/posts/{post_id}",
         headers=auth_headers,
-        json={
-            "title": "Updated Title",
-            "content": "Updated content"
-        }
+        json={"title": "Updated Title", "content": "Updated content"},
     )
-    
+
     assert response.status_code == 200
     data = response.json()
     assert data["title"] == "Updated Title"
@@ -117,27 +84,17 @@ async def test_update_post(client: AsyncClient, test_user, auth_headers):
 
 @pytest.mark.asyncio
 async def test_delete_post(client: AsyncClient, test_user, auth_headers):
-    """Test deleting a post."""
     # Create a post first
     create_response = await client.post(
-        "/posts",
-        headers=auth_headers,
-        json={
-            "title": "To Delete",
-            "content": "Content"
-        }
+        "/posts", headers=auth_headers, json={"title": "To Delete", "content": "Content"}
     )
     post_id = create_response.json()["id"]
-    
+
     # Delete the post
-    response = await client.delete(
-        f"/posts/{post_id}",
-        headers=auth_headers
-    )
-    
+    response = await client.delete(f"/posts/{post_id}", headers=auth_headers)
+
     assert response.status_code == 200
-    
+
     # Verify post is deleted
     get_response = await client.get(f"/posts/{post_id}")
     assert get_response.status_code == 404
-
